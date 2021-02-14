@@ -394,6 +394,10 @@ void pup_cd_eject_continue(PupDevice *dev, PupOperation *operation)
 		                     g_strerror(errno));
 		return;
 	}
+
+	// udev locks the tray if media is detected, try to unlock first
+	ioctl(fd, CDROM_LOCKDOOR, 0);
+
 	if (ioctl(fd, CDROMEJECT, 0) < 0)
 	{
 		pup_operation_return(operation, FALSE, g_io_error_from_errno(errno),
