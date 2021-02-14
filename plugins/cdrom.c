@@ -246,7 +246,7 @@ void pup_cd_drive_get_all(PupVMMonitor *monitor)
 		g_critical("Couldn't open /sys/block: %s", error->message);
 		g_clear_error(&error);
 	}
-	
+
 	struct udev *udev_ctx = udev_new();
 	gchar *one_sysname;
 	while ((one_sysname = (gchar *) g_dir_read_name(block_dir)))
@@ -439,44 +439,38 @@ PupCD *pup_cd_new_from_drive(PupCDDrive *drv, PupVMMonitor *monitor)
 	pup_vm_monitor_unlock(monitor);
 
 	blkid_probe probe = blkid_new_probe_from_filename(volume->unix_dev);
+	const char * str;
+	volume->fstype = NULL;
+	volume->label = NULL;
+	volume->uuid = NULL;
 	if (probe)
 	{
-		blkid_do_safeprobe(probe);
-		if (blkid_probe_lookup_value(probe, "TYPE",
-			                         (const char **) &(volume->fstype), NULL) == 0)
+		blkid_do_safeprobe (probe);
+		if (blkid_probe_lookup_value (probe, "TYPE", &str, NULL) == 0) {
 			volume->fstype = g_strdup(volume->fstype);
-		else
-			volume->fstype = NULL;
-		if (blkid_probe_lookup_value(probe, "LABEL",
-			                         (const char **) &(volume->label), NULL) == 0)
+		}
+		if (blkid_probe_lookup_value (probe, "LABEL", &str, NULL) == 0) {
 			volume->label = g_strdup(volume->label);
-		else
-			volume->label = NULL;
-		if (blkid_probe_lookup_value(probe, "UUID",
-			                         (const char **) &(volume->uuid), NULL) == 0)
+		}
+		if (blkid_probe_lookup_value (probe, "UUID", &str, NULL) == 0) {
 			volume->uuid = g_strdup(volume->uuid);
-		else
-			volume->uuid = NULL;
-
+		}
 		blkid_free_probe(probe);
 	}
-	/*
+
 	if (! volume->fstype)
 	{
-		g_object_unref(disk);
-		return NULL;
-	}
-	*/
-	//Check for audio CD
-	gint fd = open(volume->unix_dev, O_NONBLOCK | O_RDWR);
-	if (fd >= 0)
-	{
-		if (ioctl(fd, CDROM_DISC_STATUS, 0) == CDS_AUDIO)
+		//Check for audio CD
+		gint fd = open(volume->unix_dev, O_NONBLOCK | O_RDWR);
+		if (fd >= 0)
 		{
-			disk->audio_cd = TRUE;
-			volume->flags &= (~PUP_VOLUME_IS_MOUNTABLE);
+			if (ioctl(fd, CDROM_DISC_STATUS, 0) == CDS_AUDIO)
+			{
+				disk->audio_cd = TRUE;
+				volume->flags &= (~PUP_VOLUME_IS_MOUNTABLE);
+			}
+			close (fd);
 		}
-		close (fd);
 	}
 	//No need to check for mounts, daemon will do it for us
 	
