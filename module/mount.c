@@ -164,14 +164,7 @@ void pup_mount_umount_w_operation(GMount *mount, GMountUnmountFlags flags,
 	PupClientDevice *dev = PUP_CLIENT_DEVICE(self->holder);
 	pup_client_lock(dev);
 
-#if GLIB_CHECK_VERSION(2, 46, 0)
-	GTask * task; // introduced in 2.36
-	task = g_task_new (self, cancellable, callback, user_data);
-#else
-	GSimpleAsyncResult * task; // deprecated in 2.46
-	task = g_simple_async_result_new (G_OBJECT(self), callback, user_data, pup_mount_umount);
-#endif
-
+	GTask * task = g_task_new (self, cancellable, callback, user_data);
 	pup_client_monitor_start_operation (dev->monitor, dev->holder,
 	                                    "umount", NULL, mount_operation,
 	                                    task);
@@ -196,14 +189,7 @@ void pup_mount_eject_w_operation(GMount *mount, GMountUnmountFlags flags,
 	PupClientDevice *dev = PUP_CLIENT_DEVICE(self->holder);
 	pup_client_lock(dev);
 
-#if GLIB_CHECK_VERSION(2, 46, 0)
-	GTask * task; // introduced in 2.36
-	task = g_task_new (self, cancellable, callback, user_data);
-#else
-	GAsyncResult * task; // deprecated in 2.46
-	task = g_simple_async_result_new (G_OBJECT(self), callback, user_data, pup_mount_umount);
-#endif
-
+	GTask * task = g_task_new (self, cancellable, callback, user_data);
 	pup_client_monitor_start_operation (dev->monitor, dev->holder,
 	                                    "eject", NULL, mount_operation,
 	                                    task);

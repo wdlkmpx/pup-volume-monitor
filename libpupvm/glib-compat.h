@@ -4,7 +4,7 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-/** 2021-01-12 **/
+/** 2021-02-15 **/
 
 #ifndef __GLIB_COMPAT_H
 #define __GLIB_COMPAT_H
@@ -23,6 +23,30 @@
    char * data = g_key_file_to_data (kfile, NULL, error); \
    g_file_set_contents (filename, data, -1, error); \
    g_free (data); \
+}
+#endif
+
+
+// GLIB < 2.36
+#if ! GLIB_CHECK_VERSION (2, 36, 0)
+#define GTask  GSimpleAsyncResult
+#define G_TASK G_SIMPLE_ASYNC_RESULT
+#define g_task_new(source,cancellable,callback,callback_data) \
+        (g_simple_async_result_new(G_OBJECT(source),callback,callback_data,NULL))
+#define g_task_propagate_boolean(result,error) \
+        (!g_simple_async_result_propagate_error(result,error))
+#define g_task_return_boolean(task,result) { \
+   g_simple_async_result_set_op_res_gboolean(task,result); \
+   g_simple_async_result_complete(task); \
+}
+/*#define g_task_return_new_error(task,domain,code,format,...) { \
+   g_simple_async_result_set_error(task,domain,code,format,...); \
+   g_simple_async_result_complete(task); \
+}*/
+#define g_task_return_error(task,error) { \
+   g_simple_async_result_set_from_error(task,error); \
+   g_simple_async_result_complete(task); \
+   g_error_free(error); \
 }
 #endif
 

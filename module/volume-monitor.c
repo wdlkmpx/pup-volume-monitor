@@ -217,14 +217,7 @@ void pup_volume_monitor_raise_events_cb(PupClientMonitor *monitor,
 gboolean pup_volume_monitor_generic_finish(GObject *object, GAsyncResult *result,
                                            GError **error)
 {
-#if GLIB_CHECK_VERSION(2, 46, 0)
 	return (g_task_propagate_boolean (G_TASK (result), error));
-#else
-	gboolean res = TRUE;
-	if (g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (result), error))
-		res = FALSE;
-	return res;
-#endif
 }
 
 gboolean pup_volume_monitor_is_supported()

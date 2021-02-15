@@ -185,14 +185,7 @@ void pup_client_volume_mount(GVolume *volume, GMountMountFlags flags,
 	PupClientDevice *self = PUP_CLIENT_DEVICE(volume);
 	pup_client_lock(self);
 
-#if GLIB_CHECK_VERSION(2, 46, 0)
-	GTask *task; // introduced in 2.36
-	task = g_task_new (self, cancellable, callback, user_data);
-#else
-	GSimpleAsyncResult * task; // deprecated in 2.46
-	task = g_simple_async_result_new (G_OBJECT(self), callback, user_data, pup_client_volume_mount);
-#endif
-
+	GTask *task = g_task_new (self, cancellable, callback, user_data);
 	pup_client_monitor_start_operation (self->monitor, self->holder,
 	                                    "mount", NULL, mount_operation,
 	                                    task);
@@ -248,14 +241,7 @@ void pup_client_volume_eject_w_operation(GVolume *volume,
 	PupClientDevice *self = PUP_CLIENT_DEVICE(volume);
 	pup_client_lock(self);
 
-#if GLIB_CHECK_VERSION(2, 46, 0)
-	GTask *task; // introduced in 2.36
-	task = g_task_new (self, cancellable, callback, user_data);
-#else
-	GSimpleAsyncResult * task; // deprecated in 2.46
-	task = g_simple_async_result_new (G_OBJECT(self), callback, user_data, pup_client_volume_eject);
-#endif
-
+	GTask * task = g_task_new (self, cancellable, callback, user_data);
 	pup_client_monitor_start_operation (self->monitor, self->holder,
 	                                    "eject", NULL, mount_operation,
 	                                    task);

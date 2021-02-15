@@ -207,12 +207,7 @@ void pup_client_monitor_start_operation(PupClientMonitor *monitor,
                                         const gchar *oper_name,
                                         const gchar *args,
                                         GMountOperation *mount_operation,
-#if GLIB_CHECK_VERSION(2, 46, 0)
-										GTask *result)
-#else
-										GSimpleAsyncResult *result)
-#endif	
-
+                                        GTask *result)
 {
 	//Create new operation
 	PupGIOOperation *operation = g_new0(PupGIOOperation, 1);
@@ -244,24 +239,13 @@ void pup_client_monitor_operation_return_cb (PupRemoteOperation *operation,
                                              const gchar *detail)
 {
 	PupGIOOperation *gio_operation = (PupGIOOperation *) operation;
-#if GLIB_CHECK_VERSION(2, 46, 0)
-	if (success)
-		g_task_return_boolean (gio_operation->result, TRUE);
-	else
-		g_task_return_new_error (gio_operation->result, G_IO_ERROR, error_code, "%s", detail);
-#else
-	//g_simple_async_* was deprecated in 2.46
-	if (success)
-		g_simple_async_result_set_op_res_gboolean (gio_operation->result, TRUE);
-	else
-	{
-		g_simple_async_result_set_error(gio_operation->result,
-		                                G_IO_ERROR,
-		                                error_code,
-		                                "%s", detail);
+	if (success) {
+		g_task_return_boolean (G_TASK (gio_operation->result), TRUE);
+	} else {
+		GError * error = g_error_new (G_IO_ERROR, error_code, "%s", detail);
+		g_task_return_error (G_TASK (gio_operation->result), error);
 	}
-	g_simple_async_result_complete (gio_operation->result);
-#endif
+	g_object_unref (gio_operation->result);
 	pup_device_release(gio_operation->dev);
 }
 

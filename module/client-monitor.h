@@ -73,11 +73,7 @@ typedef struct
 
 	PupDevice *dev;
 	GMountOperation *mount_operation;
-#if GLIB_CHECK_VERSION(2, 46, 0)
 	GTask *result;
-#else
-	GSimpleAsyncResult *result;
-#endif	
 	guint current_query;
 } PupGIOOperation;
 
@@ -96,11 +92,7 @@ gboolean pup_client_monitor_connect (PupClientMonitor *self);
 void pup_client_monitor_ask_question_cb(PupRemoteOperation *operation,const gchar *question,const gchar **choices);
 void pup_client_monitor_ask_passwd_cb(PupRemoteOperation *operation,const gchar *msg,GAskPasswordFlags flags);
 void pup_client_monitor_operation_return_cb(PupRemoteOperation *operation,gboolean success,guint error_code,const gchar *detail);
-void pup_client_monitor_start_operation(PupClientMonitor *monitor,PupDevice *dev,const gchar *oper_name,const gchar *args,GMountOperation *mount_operation,
-#if GLIB_CHECK_VERSION(2, 46, 0)
-	GTask *result);
-#else
-	GSimpleAsyncResult *result);
-#endif	
+void pup_client_monitor_start_operation(PupClientMonitor *monitor,PupDevice *dev,const gchar *oper_name,
+                                        const gchar *args, GMountOperation *mount_operation, GTask *result);
 void pup_client_monitor_register(GIOModule *module);
 
